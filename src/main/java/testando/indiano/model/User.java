@@ -29,7 +29,7 @@ public class User {
     @NotBlank
     @Size(max = 20)
     @Column(name = "username")
-    private String userName;
+    private String username;
 
     @NotBlank
     @Email
@@ -43,14 +43,14 @@ public class User {
     private String password;
 
     public User(String userName, String email, String password) {
-        this.userName = userName;
+        this.username = userName;
         this.email = email;
         this.password = password;
     }
 
     @Setter
     @Getter
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
                joinColumns = @JoinColumn(name = "user_id"),
                inverseJoinColumns = @JoinColumn (name = "role_id"))
