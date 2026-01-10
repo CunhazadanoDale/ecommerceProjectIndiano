@@ -1,4 +1,8 @@
 package testando.indiano.service;
 
-public class CartService {
+import testando.indiano.payload.CartDTO;
+
+
+public interface CartService {
+    CartDTO addProductToCart(Long productId, Integer quantity);
 }
