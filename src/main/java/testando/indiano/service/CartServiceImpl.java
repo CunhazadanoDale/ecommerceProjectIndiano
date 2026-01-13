@@ -1,13 +1,21 @@
 package testando.indiano.service;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import testando.indiano.exceptions.APIExceptions;
 import testando.indiano.exceptions.ResourceNotFoundException;
 import testando.indiano.model.Cart;
+import testando.indiano.model.CartItem;
 import testando.indiano.model.Product;
 import testando.indiano.payload.CartDTO;
+import testando.indiano.payload.ProductDTO;
+import testando.indiano.repositories.CartItemRepository;
 import testando.indiano.repositories.CartRepository;
 import testando.indiano.repositories.ProductRepository;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class CartServiceImpl implements CartService{
@@ -19,6 +27,12 @@ public class CartServiceImpl implements CartService{
     private ProductRepository productRepository;
 
     @Autowired
+    private CartItemRepository cartItemRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
     private AuthUtil authUtil;
 
     @Override
@@ -28,10 +42,52 @@ public class CartServiceImpl implements CartService{
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
 
+        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(
+                cart.getCartId(),
+                productId
+        );
 
+        if (cartItem != null) {
+            throw new APIExceptions("Product " + product.getProductName() + "already exists in this cart");
+        }
 
+        if (product.getQuantity() == 0) {
+            throw new APIExceptions(product.getProductName() + " is not available");
+        }
 
-        return null;
+        if (product.getQuantity() < quantity) {
+            throw new APIExceptions("Please, make an order of the " + product.getProductName() + " less than or equal to the quantity " + product.getQuantity());
+        }
+
+        CartItem newCartItem = new CartItem();
+
+        newCartItem.setProduct(product);
+        newCartItem.setCart(cart);
+        newCartItem.setQuantity(quantity);
+        newCartItem.setDiscount(product.getDiscount());
+        newCartItem.setProductPrice(product.getSpecialPrice());
+
+        cartItemRepository.save(newCartItem);
+
+        product.setQuantity(product.getQuantity());
+
+        cart.setTotalPrice(cart.getTotalPrice() + (product.getSpecialPrice() * quantity));
+
+        cartRepository.save(cart);
+
+        CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
+
+        List<CartItem> cartItemList = cart.getCartItemList();
+        Stream<ProductDTO> productDTOStream = cartItemList.stream().map(item -> {
+            ProductDTO map = modelMapper.map(item.getProduct(), ProductDTO.class);
+            map.setQuantity(item.getQuantity());
+
+            return map;
+        });
+
+        cartDTO.setProducts(productDTOStream.toList());
+
+        return cartDTO;
     }
 
     private Cart createCart(){
