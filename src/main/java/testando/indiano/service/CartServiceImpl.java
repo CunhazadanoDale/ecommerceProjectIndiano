@@ -16,6 +16,7 @@ import testando.indiano.repositories.ProductRepository;
 import testando.indiano.util.AuthUtil;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -89,6 +90,29 @@ public class CartServiceImpl implements CartService{
         cartDTO.setProducts(productDTOStream.toList());
 
         return cartDTO;
+    }
+
+    @Override
+    public List<CartDTO> getAllCarts() {
+        List<Cart> carts = cartRepository.findAll();
+
+        if(carts.isEmpty()) {
+            throw new APIExceptions("No cart exists");
+        }
+
+        List<CartDTO> cartDTOS = carts.stream()
+                .map(cart -> {
+                    CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
+                    List<ProductDTO> products = cart.getCartItemList().stream()
+                            .map(p -> modelMapper.map(p.getProduct(), ProductDTO.class))
+                            .collect(Collectors.toList());
+
+                    cartDTO.setProducts(products);
+
+                    return cartDTO;
+                }).toList();
+
+        return cartDTOS;
     }
 
     private Cart createCart(){
