@@ -13,6 +13,7 @@ import testando.indiano.payload.ProductDTO;
 import testando.indiano.repositories.CartItemRepository;
 import testando.indiano.repositories.CartRepository;
 import testando.indiano.repositories.ProductRepository;
+import testando.indiano.util.AuthUtil;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -91,7 +92,7 @@ public class CartServiceImpl implements CartService{
     }
 
     private Cart createCart(){
-        Cart userCart = cartRepository.findCartByEmail(authUtil.loggerInEmail());
+        Cart userCart = cartRepository.findCartByEmail(authUtil.loggedInEmail());
 
         if(userCart != null) {
             return userCart;
