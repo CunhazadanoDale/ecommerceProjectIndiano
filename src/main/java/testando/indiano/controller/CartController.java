@@ -51,4 +51,7 @@ public class CartController {
 
         return new ResponseEntity<CartDTO>(cartDTO, HttpStatus.OK);
     }
+
+    @PutMapping("/cart/products/{productId}/quantity/{operation}")
+    public ResponseEntity<CartDTO> updateCartProduct()
 }
