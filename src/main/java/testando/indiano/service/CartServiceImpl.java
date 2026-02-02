@@ -164,12 +164,23 @@ public class CartServiceImpl implements CartService{
             throw new APIExceptions("Product " + product.getProductName() + " not avaliable in this cart");
         }
 
-        cartItem.setProductPrice(product.getSpecialPrice());
-        cartItem.setQuantity(cartItem.getQuantity() + quantity);
-        cartItem.setDiscount(product.getDiscount());
-        cart.setTotalPrice(cart.getTotalPrice() + (cartItem.getProductPrice() * quantity));
+        int newQuamtity = cartItem.getQuantity() + quantity;
 
-        cartRepository.save(cart);
+        if (newQuamtity < 0) {
+            throw new APIExceptions("The resulting quantity cannot be negative.");
+        }
+
+        if (newQuamtity == 0) {
+            deleteProductFromCart(cartId, productId);
+        } else {
+            cartItem.setProductPrice(product.getSpecialPrice());
+            cartItem.setQuantity(cartItem.getQuantity() + quantity);
+            cartItem.setDiscount(product.getDiscount());
+            cart.setTotalPrice(cart.getTotalPrice() + (cartItem.getProductPrice() * quantity));
+
+            cartRepository.save(cart);
+        }
+
         CartItem updatedItem = cartItemRepository.save(cartItem);
         if(updatedItem.getQuantity() == 0) {
             cartItemRepository.deleteById(updatedItem.getCartItemId());
@@ -189,6 +200,7 @@ public class CartServiceImpl implements CartService{
         return cartDTO;
     }
 
+    @Transactional
     @Override
     public String deleteProductFromCart(Long cartId, Long productId) {
         Cart cart = cartRepository.findById(cartId)
