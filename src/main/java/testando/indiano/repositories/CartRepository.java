@@ -13,4 +13,6 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
 
     @Query("SELECT c FROM Cart c WHRE c.user.email = ?1 AND c.id = ?2")
     Cart findCartByEmailAndCartId(String emailId, Long cartId);
+
+
 }
