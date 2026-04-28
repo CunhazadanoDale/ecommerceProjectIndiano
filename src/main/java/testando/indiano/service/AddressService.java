@@ -1,6 +1,5 @@
 package testando.indiano.service;
 
-import jakarta.validation.Valid;
 import testando.indiano.model.User;
 import testando.indiano.payload.AddressDTO;
 
@@ -12,4 +11,5 @@ public interface AddressService {
     List<AddressDTO> getAddresses();
     AddressDTO getAddressFromId(Long addressId);
     AddressDTO updateAddressFromId(Long addressId, AddressDTO addressDTO);
+    String deleteAddress(Long addressId);
 }
