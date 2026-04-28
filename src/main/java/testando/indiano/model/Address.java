@@ -46,6 +46,8 @@ public class Address {
     @Size(min = 3, message = "Pincode must be atleast 3 characters")
     private String pincode;
 
+    private String buildingName;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
