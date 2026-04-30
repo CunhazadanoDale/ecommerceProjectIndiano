@@ -34,6 +34,7 @@ public class Order {
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
+
     private Double totalAmount;
 
     private String orderStatus;
